@@ -1,0 +1,10 @@
+[project]
+name = "amigo-oculto-litestar"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "litestar[standard]>=2.13.0",
+    "pydantic-settings>=2.7.0",
+]
