@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from application.providers.hash_provider import HashProvider
-from domain.models.user_model import User
+from domain.entities.user_entity import User
 from domain.repositories import UserRepository
 from presentation.exceptions.user_exceptions import PasswordsDoesNotMatchException
 
@@ -24,14 +24,16 @@ class RegisterUsecase:
         self.user_repository = user_repository
         self.hash_provider = hash_provider
 
-    async def execute(self, register_data: RegisterRequest) -> User:
+    async def execute(self, register_data: RegisterRequest) -> RegisterResponse:
         if register_data.password != register_data.password:
             raise PasswordsDoesNotMatchException()
 
         user_created = await self.user_repository.create(
-            name=register_data.name,
-            password=self.hash_provider.hash(register_data.password),
-            phone_number=register_data.phone_number,
+            User(
+                name=register_data.name,
+                password=self.hash_provider.hash(register_data.password),
+                phone_number=register_data.phone_number,
+            )
         )
 
-        return user_created
+        return RegisterResponse(user_created=user_created)

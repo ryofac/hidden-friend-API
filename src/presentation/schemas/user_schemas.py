@@ -11,3 +11,8 @@ class UserSignupSchema(BaseModel):
     name: str
     password: str
     phone_number: str
+
+
+class UserResponseSchema(BaseModel):
+    name: str
+    phone_number: str

@@ -1,8 +1,9 @@
-import token
 from dataclasses import dataclass
 
 from application.providers.hash_provider import HashProvider
-from domain.models.user_model import User
+from application.providers.token_provider import TokenProvider
+from core.settings import settings
+from domain.entities.user_entity import User
 from domain.repositories import UserRepository
 from presentation.exceptions.user_exceptions import (
     CredentialsException,
@@ -17,8 +18,8 @@ class LoginRequest:
 
 @dataclass
 class LoginResponse:
-    user: User
-    token: str
+    refresh_token: str
+    access_token: str
 
 
 class LoginUserUsecase:
@@ -26,9 +27,11 @@ class LoginUserUsecase:
         self,
         user_repository: UserRepository,
         hash_provider: HashProvider,
+        token_provider: TokenProvider,
     ):
         self.user_repository = user_repository
         self.hash_provider = hash_provider
+        self.token_provider = token_provider
 
     async def execute(self, login_data: LoginRequest) -> LoginResponse:
         user_found: User = await self.user_repository.get_user_by_phone_number(
@@ -43,6 +46,18 @@ class LoginUserUsecase:
         )
 
         if not valid_login:
+            print("Login não válido")
             raise CredentialsException()
 
-        return {"user": user_found, "token": token}
+        acess_token = self.token_provider.encode(
+            {"sub": user_found.pas},
+            expires=settings.ACESS_TOKEN_EXPIRES_SECONDS,
+        )
+
+        refresh_token = self.token_provider.encode(
+            {"sub": user_found.pas},
+            expires=settings.ACESS_TOKEN_EXPIRES_SECONDS
+            + settings.REFRESH_TOKEN_EXPIRES_SECONDS,
+        )
+
+        return LoginResponse(acess_token, refresh_token)
