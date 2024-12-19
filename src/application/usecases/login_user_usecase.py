@@ -49,15 +49,15 @@ class LoginUserUsecase:
             print("Login não válido")
             raise CredentialsException()
 
-        acess_token = self.token_provider.encode(
-            {"sub": user_found.pas},
+        access_token = self.token_provider.encode(
+            {"sub": user_found.phone_number},
             expires=settings.ACESS_TOKEN_EXPIRES_SECONDS,
         )
 
         refresh_token = self.token_provider.encode(
-            {"sub": user_found.pas},
+            {"sub": user_found.phone_number},
             expires=settings.ACESS_TOKEN_EXPIRES_SECONDS
             + settings.REFRESH_TOKEN_EXPIRES_SECONDS,
         )
 
-        return LoginResponse(acess_token, refresh_token)
+        return LoginResponse(refresh_token, access_token)

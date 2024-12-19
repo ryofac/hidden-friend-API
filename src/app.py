@@ -1,9 +1,23 @@
-from litestar import Litestar
+from litestar import Litestar, Request, Response
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.plugins import SwaggerRenderPlugin, YamlRenderPlugin
 
 from infra.sqlalchemy.db import create_tables
+from presentation.exceptions.base_exceptions import AppError
 from presentation.routes.auth_route import auth_route
+
+
+def app_exception_handler(request: Request, exc: AppError) -> Response:
+    return Response(
+        content={
+            "error_code": exc.code,
+            "path": request.url.path,
+            "detail": exc.detail,
+            "status_code": exc.status_code,
+        },
+        status_code=exc.status_code,
+    )
+
 
 app = Litestar(
     route_handlers=[auth_route],
@@ -18,4 +32,5 @@ app = Litestar(
             YamlRenderPlugin(path="/spec"),
         ],
     ),
+    exception_handlers={AppError: app_exception_handler},
 )

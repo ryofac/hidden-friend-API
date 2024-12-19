@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator
 
 from sqlalchemy import Engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -11,10 +11,7 @@ engine: Engine = create_async_engine(settings.DATABASE_URL)
 
 
 async def create_tables():
-    async with (
-        engine.connect() as conn
-    ):  # Usando `connect()` para obter uma conexão assíncrona
-        # Criação das tabelas no banco de dados
+    async with engine.connect() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 

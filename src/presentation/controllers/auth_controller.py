@@ -12,6 +12,7 @@ from infra.sqlalchemy.db import get_session
 from infra.sqlalchemy.repositories.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
+from presentation.middlewares.auth_middleware import JWTAuthMiddleware
 from presentation.schemas.auth_schemas import AuthResponseSchema
 from presentation.schemas.user_schemas import (
     UserLoginSchema,
@@ -28,7 +29,7 @@ class AuthController(Controller):
         "hash_provider": Provide(BCryptHashProvider, sync_to_thread=False),
     }
 
-    @post("/login")
+    @post("/login", middleware=[JWTAuthMiddleware])
     async def login(
         self,
         data: UserLoginSchema,
@@ -53,7 +54,7 @@ class AuthController(Controller):
         data: UserSignupSchema,
         user_repository: UserRepository,
         hash_provider: HashProvider,
-    ) -> None:
+    ) -> UserResponseSchema:
         usecase = RegisterUsecase(user_repository, hash_provider)
 
         print(user_repository.session)
